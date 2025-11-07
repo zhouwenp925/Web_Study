@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贝斯社活动简介</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .bass-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2.5rem;
+            color: #e74c3c;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .activity-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 5px solid #3498db;
+        }
+        
+        .activity-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .activity-section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .activity-section h2 i {
+            color: #3498db;
+        }
+        
+        .activity-info {
+            margin: 20px 0;
+        }
+        
+        .activity-info ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .activity-info li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .activity-info li:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-info li i {
+            color: #e74c3c;
+            width: 20px;
+        }
+        
+        .activity-description {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 3px solid #e74c3c;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .activity-description:before {
+            content: """;
+ position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 3rem;
+            color: #e74c3c;
+            opacity: 0.2;
+            font-family: Georgia, serif;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #3498db, transparent);
+            margin: 20px 0;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .back-link:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: #7f8c8d;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 10px;
+            }
+            header h1 {
+                font-size: 2rem;
+            }
+            .activity-section {
+                padding: 20px;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <i class="fas fa-guitar bass-icon"></i>
+            <h1>贝斯社活动简介</h1>
+            <p>探索低频魅力，感受音乐脉动</p>
+        </header>
+
+        <div class="content">
+            <div class="activity-section">
+                <h2><i class="fas fa-music"></i> 第一张图片活动基本信息介绍</h2>
+                <div class="activity-info">
+                    <ul>
+                        <li><i class="fas fa-image"></i> <strong>图片描述：</strong>社团成员在表演贝斯独奏</li>
+                        <li><i class="far fa-calendar-alt"></i> <strong>活动时间：</strong>2024年5月10日</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <strong>活动地点：</strong>学生活动中心音乐教室</li>
+                    </ul>
+                </div>
+                <div class="activity-description">
+                    活动当天黄昏下，几位社员轮流弹唱了自己最喜欢的歌曲，也有同学带来了原创作品，现场气氛轻松、愉快展示社团成员的贝斯演奏技巧和团队合作精神
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="activity-section">
+                <h2><i class="fas fa-chalkboard-teacher"></i> 第二张图片活动基本信息介绍</h2>
+                <div class="activity-info">
+                    <ul>
+                        <li><i class="fas fa-image"></i> <strong>图片描述：</strong>社团成员在室内进行贝斯教学活动</li>
+                        <li><i class="far fa-calendar-alt"></i> <strong>活动时间：</strong>2024年6月15日</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <strong>活动地点：</strong>学生活动中心多功能厅</li>
+                    </ul>
+                </div>
+                <div class="activity-description">
+                    活动当天，社团邀请了校外知名贝斯手进行现场教学和演示，社员们积极参与互动环节，提升了自己的贝斯演奏水平和音乐理解力
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="activity-section">
+                <h2><i class="fas fa-users"></i> 第三张图片活动基本信息介绍</h2>
+                <div class="activity-info">
+                    <ul>
+                        <li><i class="fas fa-image"></i> <strong>图片描述：</strong>社团成员在大厅进行贝斯合奏活动</li>
+                        <li><i class="far fa-calendar-alt"></i> <strong>活动时间：</strong>2024年7月20日</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <strong>活动地点：</strong>学生活动中心多功能厅</li>
+                    </ul>
+                </div>
+                <div class="activity-description">
+                    活动当天，社团成员们分组进行贝斯合奏比赛，展示了团队协作和音乐创作能力，现场气氛热烈，大家热烈演奏，享受音乐带来的快乐。
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="activity-section">
+                <h2><i class="fas fa-theater-masks"></i> 第四张图片活动基本信息介绍</h2>
+                <div class="activity-info">
+                    <ul>
+                        <li><i class="fas fa-image"></i> <strong>图片描述：</strong>社团成员在礼堂独自进行贝斯表演活动</li>
+                        <li><i class="far fa-calendar-alt"></i> <strong>活动时间：</strong>2024年8月5日</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <strong>活动地点：</strong>学校大礼堂</li>
+                    </ul>
+                </div>
+                <div class="activity-description">
+                    活动当天，社团成员们在学校大礼堂举办了一场小型贝斯音乐会，展示了各自的独奏和合奏作品，吸引了众多师生前来观看，现场气氛热烈，掌声不断。
+                </div>
+            </div>
+
+            <a href="job3.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回贝斯社招新报名页面</a>
+        </div>
+
+        <footer>
+            <p>校园贝斯社 &copy; 2025 版权所有</p>
+        </footer>
+    </div>
+</body>
+
+</html>
