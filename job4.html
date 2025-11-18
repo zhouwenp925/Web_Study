@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影像与文学讨论夜 · Film & Literature Talk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #FFECD6;
+            text-align: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #5a3921;
+            line-height: 1.6;
+        }
+        
+        .page {
+            display: inline-block;
+            background-color: #FFECD6;
+            box-shadow: 0 0 30px rgba(80, 58, 35, 0.25);
+            text-align: left;
+            max-width: 720px;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+        /* 并集选择器 */
+        
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: #8b4513;
+            font-family: Georgia, serif;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #d2b48c;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            margin-top: 25px;
+        }
+        
+        h3 {
+            font-size: 1.5em;
+            margin-top: 20px;
+            text-align: center;
+            background-color: #e6d2c3;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        h4 {
+            font-size: 1.2em;
+            margin-top: 15px;
+            color: #d35400;
+        }
+        /* 段落样式 */
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        /* ID选择器 */
+        
+        p#intro {
+            font-weight: bold;
+            color: #d35400;
+            font-size: 1.1em;
+            background-color: #f9e4d4;
+            padding: 12px;
+            border-left: 4px solid #d35400;
+            border-radius: 0 5px 5px 0;
+        }
+        /* 伪元素 */
+        
+        p::first-letter {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #8b4513;
+        }
+        
+        div::first-line {
+            font-weight: bold;
+        }
+        /* 表格样式 */
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        th,
+        td {
+            border: 1px solid #8b4513;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #e6d2c3;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f5e9dc;
+        }
+        
+        tr:hover {
+            background-color: #ebd5c1;
+        }
+        /* 后代选择器 */
+        
+        div table a {
+            text-decoration: none;
+            font-weight: bold;
+        }
+        /* 链接伪类 */
+        
+        a:link {
+            color: #0066cc;
+        }
+        
+        a:visited {
+            color: #663399;
+        }
+        
+        a:hover {
+            color: #ff6600;
+            text-decoration: underline;
+        }
+        
+        a:active {
+            color: #cc0000;
+        }
+        /* 带类名的链接 */
+        
+        a.red {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        a.blue {
+            color: #3498db;
+            font-weight: bold;
+        }
+        /* 链接区样式 */
+        
+        .links {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px;
+            background-color: #f5e9dc;
+            border-radius: 8px;
+        }
+        
+        .links a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .links a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        /* 公告区样式 */
+        
+        .notice {
+            background-color: #f5e9dc;
+            padding: 20px;
+            margin-top: 25px;
+            border-left: 4px solid #8b4513;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .notice div {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #d2b48c;
+        }
+        
+        .notice div:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .highlight {
+            color: #d35400;
+            font-weight: bold;
+        }
+        
+        .film-title {
+            font-style: italic;
+            color: #8b4513;
+        }
+        
+        .seat-info {
+            background-color: #f9e4d4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #d2b48c;
+            margin: 25px 0;
+        }
+        /* 报名表单样式 */
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #5a3921;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d2b48c;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1em;
+            background-color: #fff;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8b4513;
+            box-shadow: 0 0 5px rgba(139, 69, 19, 0.3);
+        }
+        
+        .form-submit {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .submit-btn {
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #5a3921;
+        }
+        
+        .form-container {
+            background-color: #f5e9dc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .form-note {
+            font-size: 0.9em;
+            color: #d35400;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- 顶部标题区 -->
+        <div class="section">
+            <h1>影像与文学讨论夜 · Film & Literature Talk</h1>
+        </div>
+
+        <!-- 活动介绍区 -->
+        <div class="section">
+            <h2 id="intro">活动介绍</h2>
+            <p>欢迎加入我们的"影像与文学讨论夜"社团！我们是一个专注于探索电影与文学作品内在联系的跨学科社团，通过定期举办的讨论活动，为热爱艺术表达的同学提供交流思想、分享感悟的平台。</p>
+            <p>本月我们将重点探讨宫崎骏的经典动画<span class="film-title">《千与千寻》</span>与其文学原型的对比分析。这部作品不仅是一部视觉盛宴，更蕴含着深刻的文学内涵和哲学思考。我们还将对比分析法国经典文学作品<span class="film-title">《小王子》</span>在不同媒介中的表现差异。</p>
+            <p id="intro">重要提示：本次活动需提前报名，名额有限，请感兴趣的同学们尽快提交报名信息。首次参加活动的同学将获得精美文学书签一套！</p>
+        </div>
+
+        <div class="section">
+            <h3>活动安排信息</h3>
+            <table>
+                <tr>
+                    <th>日期</th>
+                    <th>时间</th>
+                    <th>地点</th>
+                    <th>讨论主题</th>
+                    <th>主讲人</th>
+                </tr>
+                <tr>
+                    <td>10月15日</td>
+                    <td>19:00-21:00</td>
+                    <td>图书馆三楼会议室</td>
+                    <td>《千与千寻》中的成长与迷失</td>
+                    <td>张教授</td>
+                </tr>
+                <tr>
+                    <td>10月22日</td>
+                    <td>19:00-21:00</td>
+                    <td>人文学院302教室</td>
+                    <td>宫崎骏动画中的日本神话元素</td>
+                    <td>李老师</td>
+                </tr>
+                <tr>
+                    <td>10月29日</td>
+                    <td>19:00-21:00</td>
+                    <td>学生活动中心A厅</td>
+                    <td>从《小王子》看东西方童话的异同</td>
+                    <td>王同学</td>
+                </tr>
+                <tr>
+                    <td>11月5日</td>
+                    <td>19:00-21:00</td>
+                    <td>图书馆三楼会议室</td>
+                    <td>《肖申克的救赎》小说与电影的叙事差异</td>
+                    <td>赵教授</td>
+                </tr>
+                <tr>
+                    <td>11月12日</td>
+                    <td>19:00-21:00</td>
+                    <td>人文学院302教室</td>
+                    <td>村上春树作品中的音乐与影像</td>
+                    <td>陈老师</td>
+                </tr>
+            </table>
+
+
+
+
+
+            <!-- 活动报名信息表格区 -->
+            <div class="section">
+
+                <h3>活动报名名单</h3>
+                <table>
+                    <tr>
+                        <th>编号</th>
+                        <th>姓名</th>
+                        <th>联系方式</th>
+                        <th>报名状态</th>
+                    </tr>
+                    <tr>
+                        <td>01</td>
+                        <td>张三</td>
+                        <td>138****0001</td>
+                        <td>已确认席位</td>
+                    </tr>
+                    <tr>
+                        <td>02</td>
+                        <td>李四</td>
+                        <td>139****0002</td>
+                        <td>待确认</td>
+                    </tr>
+                    <tr>
+                        <td>03</td>
+                        <td>王五</td>
+                        <td>137****0003</td>
+                        <td>候补名单</td>
+                    </tr>
+                    <tr>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="seat-info">
+                <h4>5次交流席位有限，报名成功后以短信确认为准，请务必留下可联系的手机号。</h4>
+            </div>
+
+            <!-- 页面链接区 -->
+            <div class="section">
+                <h3>查看活动详细</h3>
+                <div class="links">
+                    <a class="red" href="https://hongchenwusdnu.github.io/bookstore/job4.html">查看往期活动照片</a>
+                    <a class="blue" href="https://zhouwenp925.github.io/Web_Study/Bass%20Club%20Recruitment%20Website-job3/job3.html">在线咨询活动详情</a>
+                </div>
+            </div>
+
+
+            <!-- 线上报名表单 -->
+            <div class="section">
+                <h3>线上活动报名</h3>
+                <div class="form-container">
+                    <form id="registration-form">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">手机号码</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">电子邮箱</label>
+                            <input type="email" id="email" name="email">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="session">选择活动场次</label>
+                            <select id="session" name="session" required>
+                            <option value="">请选择活动场次</option>
+                            <option value="session1">10月15日：《千与千寻》中的成长与迷失</option>
+                            <option value="session2">10月22日：宫崎骏动画中的日本神话元素</option>
+                            <option value="session3">10月29日：从《小王子》看东西方童话的异同</option>
+                            <option value="session4">11月5日：《肖申克的救赎》小说与电影的叙事差异</option>
+                            <option value="session5">11月12日：村上春树作品中的音乐与影像</option>
+                        </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interest">您最感兴趣的讨论主题</label>
+                            <textarea id="interest" name="interest" rows="3" placeholder="请简要说明您对本次活动的期望或感兴趣的讨论点..."></textarea>
+                        </div>
+
+                        <div class="form-submit">
+                            <button type="submit" class="submit-btn">提交报名</button>
+                        </div>
+                    </form>
+                    <p class="form-note">提交报名后，我们将在3个工作日内通过短信与您确认席位</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- 底部公告区 -->
+            <div class="section">
+                <div class="notice">
+                    <div>
+                        活动公告：本社团所有活动对全校师生免费开放，欢迎各年级同学积极参与。<br> 请提前10分钟到达活动场地，以便顺利入场并领取资料。
+                    </div>
+                    <div>
+                        报名方式：请通过学校社团管理系统在线报名，或直接联系社团负责人。<br> 报名截止日期为每场活动前一周的18:00，逾期将无法受理。
+                    </div>
+                    <div>
+                        特别提醒：为营造良好的讨论氛围，请参与者提前阅读或观看相关作品。<br> 活动现场将提供部分参考资料，但数量有限，建议自行准备。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // 表单提交处理
+            document.getElementById('registration-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 获取表单数据
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                const session = document.getElementById('session').value;
+
+                // 简单验证
+                if (!name || !phone || !session) {
+                    alert('请填写所有必填字段！');
+                    return;
+                }
+
+                // 模拟表单提交
+                alert(`感谢 ${name} 的报名！我们将通过手机 ${phone} 与您确认席位。`);
+
+                // 重置表单
+                document.getElementById('registration-form').reset();
+            });
+        </script>
+</body>
+
+</html>
