@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>尹薪钰·文字流星雨与双拼卡片</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #0b0c10;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'Microsoft YaHei', sans-serif;
+        }
+        
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        #heart-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            z-index: 2;
+        }
+        /* 优化后的双拼色卡片外壳 */
+        
+        .heart-tip {
+            position: absolute;
+            width: 120px;
+            height: 56px;
+            border-radius: 12px;
+            user-select: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: opacity 0.5s ease-out, filter 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* 关键：让内部的直角色块被外层的圆角切掉 */
+        }
+        /* 上半部分：固定纯白背景 */
+        
+        .card-name {
+            background-color: #FFFFFF;
+            color: #555555;
+            /* 深灰色字体，在白色上显得高级不刺眼 */
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-align: left;
+            padding: 4px 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            /* 极弱的分隔线 */
+        }
+        /* 下半部分：占据剩余空间，背景色通过JS随机注入 */
+        
+        .card-text {
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 8px;
+        }
+        
+        .heart-tip:hover {
+            filter: brightness(1.15) scale(1.1) !important;
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
+            z-index: 999 !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <div id="heart-container"></div>
+
+    <script>
+        const TIPS = [
+            '岁岁长安', '万喜万般宜', '长乐未央', '常安长安',
+            '顺颂时宜', '百事从欢', '喜乐有分享', '共欢新故岁',
+            '岁岁常欢愉', '万事尽可期', '如星灿烂', '行至朝雾里',
+            '得偿所愿', '不染岁月风尘', '长路浩浩荡荡', '万物更新',
+            '旧疾当愈', '长安常安', '日日是好日', '山水万程皆好运'
+        ];
+
+        const COLOR_PALETTES = [{
+            bg: '#FFB3BA',
+            fg: '#6A2C32',
+            shadow: 'rgba(255,179,186,0.4)'
+        }, {
+            bg: '#BAFFC9',
+            fg: '#1E4620',
+            shadow: 'rgba(186,255,201,0.4)'
+        }, {
+            bg: '#BAE1FF',
+            fg: '#1C3B57',
+            shadow: 'rgba(186,225,255,0.4)'
+        }, {
+            bg: '#E8BAFF',
+            fg: '#452059',
+            shadow: 'rgba(232,186,255,0.4)'
+        }, {
+            bg: '#FFDFBA',
+            fg: '#5E370C',
+            shadow: 'rgba(255,223,186,0.4)'
+        }, {
+            bg: '#FFC8DD',
+            fg: '#5C1D33',
+            shadow: 'rgba(255,200,221,0.4)'
+        }, {
+            bg: '#BDE0FE',
+            fg: '#103152',
+            shadow: 'rgba(189,224,254,0.4)'
+        }, {
+            bg: '#CDB4DB',
+            fg: '#3D254C',
+            shadow: 'rgba(205,180,219,0.4)'
+        }];
+
+        const POINTS_COUNT = 46;
+        const cardElements = [];
+
+        const meteors = [];
+        const particles = [];
+        let canvas, ctx;
+
+        // 全局高能模式开关：爆炸后触发文字流星雨
+        let isFinale = false;
+
+        function getDynamicBaseSize() {
+            const minScreenDim = Math.min(window.innerWidth, window.innerHeight);
+            return (minScreenDim * 0.60) / 32;
+        }
+
+        function getHeartX(t, baseSize) {
+            return baseSize * 16 * Math.pow(Math.sin(t), 3);
+        }
+
+        function getHeartY(t, baseSize) {
+            return -baseSize * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        }
+
+        function init() {
+            setupCanvas();
+            const container = document.getElementById('heart-container');
+            const baseSize = getDynamicBaseSize();
+
+            for (let i = 0; i < POINTS_COUNT; i++) {
+                const t = (2 * Math.PI * i) / POINTS_COUNT;
+                const bx = getHeartX(t, baseSize);
+                const by = getHeartY(t, baseSize);
+
+                const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
+                const text = TIPS[Math.floor(Math.random() * TIPS.length)];
+
+                // 外部容器，阴影随底色变化
+                const div = document.createElement('div');
+                div.className = 'heart-tip';
+                div.style.boxShadow = `0 6px 20px ${palette.shadow}`;
+                div.style.zIndex = Math.floor(Math.abs(bx)) + 10;
+
+                // 名字部分：纯白
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'card-name';
+                nameLabel.innerText = '尹薪钰 ✧';
+
+                // 祝福语部分：马卡龙色
+                const textLabel = document.createElement('div');
+                textLabel.className = 'card-text';
+                textLabel.innerText = text;
+                textLabel.style.backgroundColor = palette.bg;
+                textLabel.style.color = palette.fg;
+
+                div.appendChild(nameLabel);
+                div.appendChild(textLabel);
+
+                // 手动点击依然有效
+                div.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    explodeCard(div, palette.bg);
+                });
+
+                container.appendChild(div);
+
+                cardElements.push({
+                    el: div,
+                    bx: bx,
+                    by: by,
+                    palette: palette,
+                    bornTime: Date.now() + i * 35
+                });
+            }
+
+            // 初始化少许背景流星
+            for (let i = 0; i < 15; i++) {
+                meteors.push(createMeteor(true));
+            }
+
+            requestAnimationFrame(mainEngineLoop);
+
+            // --- 10秒后自动触发结局 ---
+            setTimeout(triggerFinale, 10000);
+        }
+
+        function setupCanvas() {
+            canvas = document.getElementById('bg-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function explodeCard(div, color, particleCount = 18) {
+            if (!div.parentNode) return;
+            div.style.pointerEvents = 'none';
+            div.style.opacity = '0';
+
+            const rect = div.getBoundingClientRect();
+            const clickX = rect.left + rect.width / 2;
+            const clickY = rect.top + rect.height / 2;
+
+            createHeartFireworks(clickX, clickY, color, particleCount);
+
+            const currentTransform = div.style.transform;
+            div.style.transform = `${currentTransform} scale(0) rotate(360deg)`;
+            setTimeout(() => div.remove(), 500);
+        }
+
+        function triggerFinale() {
+            isFinale = true;
+
+            cardElements.forEach((card) => {
+                if (!card.el.parentNode) return;
+                setTimeout(() => {
+                    explodeCard(card.el, card.palette.bg, 28);
+                }, Math.random() * 2000);
+            });
+        }
+
+        // --- 创造文字流星 ---
+        function createMeteor(randomY = false) {
+            const colors = ['#FFC8DD', '#BDE0FE', '#FFFFFF', '#FFE5EC', '#E8BAFF'];
+            return {
+                text: TIPS[Math.floor(Math.random() * TIPS.length)], // 随机挂载一句祝福
+                x: Math.random() * canvas.width,
+                y: randomY ? Math.random() * canvas.height : -30,
+                length: Math.random() * 40 + 30, // 尾巴长度
+                speedX: Math.random() * 1.5 + 1.0,
+                speedY: Math.random() * 3.5 + 2.5,
+                opacity: Math.random() * 0.5 + 0.3, // 让流星稍亮一点，保证文字清晰
+                color: colors[Math.floor(Math.random() * colors.length)]
+            };
+        }
+
+        function createHeartFireworks(sx, sy, color, count = 18) {
+            for (let i = 0; i < count; i++) {
+                const angle = (2 * Math.PI * i) / count;
+                const vx = 16 * Math.pow(Math.sin(angle), 3);
+                const vy = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+                const randSpeed = Math.random() * 0.3 + 0.8;
+
+                particles.push({
+                    x: sx,
+                    y: sy,
+                    vx: vx * randSpeed * 0.3,
+                    vy: vy * randSpeed * 0.3,
+                    size: Math.random() * 2.5 + 2,
+                    color: color,
+                    alpha: 1.0,
+                    decay: Math.random() * 0.015 + 0.015
+                });
+            }
+        }
+
+        function drawMiniHeart(ctx, x, y, size, color, alpha) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x - size / 2, y - size / 2, x - size, y + size / 3, x, y + size);
+            ctx.bezierCurveTo(x + size, y + size / 3, x + size / 2, y - size / 2, x, y);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function mainEngineLoop(timestamp) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 如果处于高潮阶段，满天都会是文字流星
+            const maxMeteors = isFinale ? 80 : 15;
+            const spawnRate = isFinale ? 0.3 : 0.05;
+
+            if (meteors.length < maxMeteors && Math.random() < spawnRate) {
+                meteors.push(createMeteor());
+            }
+
+            for (let i = meteors.length - 1; i >= 0; i--) {
+                let m = meteors[i];
+                m.x += m.speedX;
+                m.y += m.speedY;
+
+                ctx.save();
+                ctx.globalAlpha = m.opacity;
+
+                // 1. 绘制流星前端的祝福文字（带有微弱的霓虹发光）
+                ctx.font = "bold 12px 'Microsoft YaHei'";
+                ctx.fillStyle = m.color;
+                ctx.shadowColor = m.color;
+                ctx.shadowBlur = 6; // 文字发光效果
+                ctx.textAlign = "left";
+                ctx.textBaseline = "middle";
+                ctx.fillText(m.text, m.x, m.y);
+
+                // 2. 绘制拖在文字后方的流星光影尾巴
+                ctx.beginPath();
+                ctx.strokeStyle = m.color;
+                ctx.lineWidth = isFinale ? 1.5 : 1.0;
+                ctx.shadowBlur = 0; // 尾巴不需要发光，否则会太卡
+                // 为了不穿透文字，光束的起点在文字的左上角偏后方
+                ctx.moveTo(m.x - 4, m.y - 4);
+                ctx.lineTo(m.x - m.length * (m.speedX / m.speedY), m.y - m.length);
+                ctx.stroke();
+
+                ctx.restore();
+
+                if (m.y > canvas.height + 40 || m.x > canvas.width + 100) {
+                    meteors.splice(i, 1);
+                }
+            }
+
+            // 烟花粒子逻辑
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.03;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    drawMiniHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
+                }
+            }
+
+            const phase = timestamp / 380;
+            const scale = 1.0 + 0.05 * Math.sin(phase);
+            const now = Date.now();
+
+            cardElements.forEach((card) => {
+                if (!card.el.parentNode) return;
+
+                if (now >= card.bornTime) {
+                    card.el.style.opacity = '0.95';
+
+                    const curX = card.bx * scale;
+                    const curY = card.by * scale;
+
+                    const selfRotate = Math.sin(phase + card.bx * 0.1) * 3;
+                    card.el.style.transform = `translate(-50%, -50%) translate3d(${curX}px, ${curY}px, 0) scale(1) rotate(${selfRotate}deg)`;
+                } else {
+                    card.el.style.transform = `translate(-50%, -50%) translate3d(0, 0, 0) scale(0) rotate(0deg)`;
+                }
+            });
+
+            requestAnimationFrame(mainEngineLoop);
+        }
+
+        window.addEventListener('resize', () => {
+            setupCanvas();
+            window.location.reload();
+        });
+
+        window.onload = init;
+    </script>
+
+</body>
+
+</html>
