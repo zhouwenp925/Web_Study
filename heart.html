@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>尹薪钰·专属流星雨</title>
     <style>
         * {
@@ -15,12 +15,15 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        body {
+        body, html {
             background-color: #0b0c10;
+            /* 手机端必须用 fixed 锁死，防止浏览器地址栏收缩引起的抖动 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            position: relative;
             font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'Microsoft YaHei', sans-serif;
         }
         
@@ -50,13 +53,13 @@
             border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
-            transition: opacity 0.5s ease-out, filter 0.2s;
+            /* 将动画交给 GPU 硬件加速，保证手机端 60FPS 不掉帧 */
+            will-change: transform, opacity;
             border: 1px solid rgba(255, 255, 255, 0.15);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            opacity: 0; /* 初始透明 */
         }
         
         .card-name {
@@ -68,6 +71,7 @@
             text-align: left;
             padding: 4px 8px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            white-space: nowrap;
         }
         
         .card-text {
@@ -79,27 +83,32 @@
             justify-content: center;
             align-items: center;
             padding: 0 8px;
+            white-space: nowrap;
         }
-        
-        .heart-tip:hover {
-            filter: brightness(1.15) scale(1.1) !important;
-            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
-            z-index: 999 !important;
+
+        /* 💻 电脑端鼠标悬停互动 */
+        @media (hover: hover) {
+            .heart-tip:hover {
+                filter: brightness(1.15) !important;
+                z-index: 9999 !important;
+            }
         }
-        
+
+        /* 📱 手机端专属响应式 UI 极限优化 */
         @media screen and (max-width: 768px) {
             .heart-tip {
-                width: 96px;
-                height: 46px;
-                border-radius: 9px;
+                width: 86px;       /* 缩小宽度，给心形留出呼吸空间 */
+                height: 40px;      /* 压低高度，变得更像精致的便利贴 */
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* 减轻阴影提升手机性能 */
             }
             .card-name {
-                font-size: 9px;
-                padding: 3px 6px;
+                font-size: 9px;    /* 名字缩小，依然保持白色高级感 */
+                padding: 2px 5px;
             }
             .card-text {
                 font-size: 11px;
-                padding: 0 4px;
+                padding: 0 2px;
             }
         }
     </style>
@@ -111,6 +120,11 @@
     <div id="heart-container"></div>
 
     <script>
+        // 阻止手机端多余的滑动，锁死屏幕
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
         const TIPS = [
             '所念皆星河', '今天也很想你', '岁岁常相见', '做自己的光',
             '偏爱与例外', '万喜万般宜', '满眼都是你', '愿你耀如繁星',
@@ -119,54 +133,35 @@
             '你是我的星辰', '前路浩浩荡荡', '世界第一可爱', '得偿所愿'
         ];
 
-        const COLOR_PALETTES = [{
-            bg: '#FFB3BA',
-            fg: '#6A2C32',
-            shadow: 'rgba(255,179,186,0.4)'
-        }, {
-            bg: '#BAFFC9',
-            fg: '#1E4620',
-            shadow: 'rgba(186,255,201,0.4)'
-        }, {
-            bg: '#BAE1FF',
-            fg: '#1C3B57',
-            shadow: 'rgba(186,225,255,0.4)'
-        }, {
-            bg: '#E8BAFF',
-            fg: '#452059',
-            shadow: 'rgba(232,186,255,0.4)'
-        }, {
-            bg: '#FFDFBA',
-            fg: '#5E370C',
-            shadow: 'rgba(255,223,186,0.4)'
-        }, {
-            bg: '#FFC8DD',
-            fg: '#5C1D33',
-            shadow: 'rgba(255,200,221,0.4)'
-        }, {
-            bg: '#BDE0FE',
-            fg: '#103152',
-            shadow: 'rgba(189,224,254,0.4)'
-        }, {
-            bg: '#CDB4DB',
-            fg: '#3D254C',
-            shadow: 'rgba(205,180,219,0.4)'
-        }];
+        const COLOR_PALETTES = [
+            { bg: '#FFB3BA', fg: '#6A2C32', shadow: 'rgba(255,179,186,0.4)' },
+            { bg: '#BAFFC9', fg: '#1E4620', shadow: 'rgba(186,255,201,0.4)' },
+            { bg: '#BAE1FF', fg: '#1C3B57', shadow: 'rgba(186,225,255,0.4)' },
+            { bg: '#E8BAFF', fg: '#452059', shadow: 'rgba(232,186,255,0.4)' },
+            { bg: '#FFDFBA', fg: '#5E370C', shadow: 'rgba(255,223,186,0.4)' },
+            { bg: '#FFC8DD', fg: '#5C1D33', shadow: 'rgba(255,200,221,0.4)' },
+            { bg: '#BDE0FE', fg: '#103152', shadow: 'rgba(189,224,254,0.4)' },
+            { bg: '#CDB4DB', fg: '#3D254C', shadow: 'rgba(205,180,219,0.4)' }
+        ];
 
         const isMobile = window.innerWidth <= 768;
-        const POINTS_COUNT = isMobile ? 35 : 46;
-
+        // 手机端精简到 26 个点，保证绝不遮挡字，视觉极其干净
+        const POINTS_COUNT = isMobile ? 26 : 42; 
+        
         const cardElements = [];
         const meteors = [];
         const particles = [];
         let canvas, ctx;
-
         let isFinale = false;
 
         function getDynamicBaseSize() {
-            const minScreenDim = Math.min(window.innerWidth, window.innerHeight);
-            const ratio = isMobile ? 0.85 : 0.60;
-            return (minScreenDim * ratio) / 32;
+            if (isMobile) {
+                // 手机端让心形的宽度占据屏幕的 92%，撑起最大气场
+                return (window.innerWidth * 0.92) / 32;
+            } else {
+                const minScreenDim = Math.min(window.innerWidth, window.innerHeight);
+                return (minScreenDim * 0.65) / 32;
+            }
         }
 
         function getHeartX(t, baseSize) {
@@ -182,13 +177,12 @@
             const container = document.getElementById('heart-container');
             const baseSize = getDynamicBaseSize();
 
-            // 【核心修改1】避开顶部重叠的“沟壑”，左右留白，首尾完美不相连
-            const topGap = 0.4; // 避开 t=0 和 t=2π 附近的盲区
+            // 【优化】避开心形顶部的死角，留出漂亮的沟壑不重叠
+            const topGap = isMobile ? 0.35 : 0.30; 
 
             for (let i = 0; i < POINTS_COUNT; i++) {
-                // 根据间隔重新计算位置弧度 t
                 const t = topGap + ((2 * Math.PI - 2 * topGap) * i) / (POINTS_COUNT - 1);
-
+                
                 const bx = getHeartX(t, baseSize);
                 const by = getHeartY(t, baseSize);
 
@@ -198,7 +192,9 @@
                 const div = document.createElement('div');
                 div.className = 'heart-tip';
                 div.style.boxShadow = `0 6px 20px ${palette.shadow}`;
-                div.style.zIndex = Math.floor(Math.abs(bx)) + 10;
+                
+                // 【核心层叠优化】让 Y 轴越靠下的卡片显示层级越高，呈现出完美的鱼鳞层叠效果，永不突兀
+                div.style.zIndex = Math.floor(by) + 1000;
 
                 const nameLabel = document.createElement('div');
                 nameLabel.className = 'card-name';
@@ -213,40 +209,33 @@
                 div.appendChild(nameLabel);
                 div.appendChild(textLabel);
 
-                div.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    explodeCard(div, palette.bg);
-                });
-
-                div.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                    explodeCard(div, palette.bg);
-                }, {
-                    passive: true
-                });
+                // 电脑点击与手机触摸爆炸绑定
+                div.addEventListener('click', (e) => { e.stopPropagation(); explodeCard(div, palette.bg); });
+                div.addEventListener('touchstart', (e) => { e.stopPropagation(); explodeCard(div, palette.bg); }, { passive: true });
 
                 container.appendChild(div);
 
-                // 【核心修改2】极大地放慢卡片生长速度，过程长达 7 秒
-                const delayMs = isMobile ? 200 : 160;
+                // 【绝美生成节奏】每张卡片相隔 280ms 出现，生成整颗心需要近 7 秒
+                const delayMs = isMobile ? 280 : 160;
 
                 cardElements.push({
                     el: div,
                     bx: bx,
                     by: by,
                     palette: palette,
-                    bornTime: Date.now() + i * delayMs
+                    bornTime: Date.now() + i * delayMs 
                 });
             }
 
-            for (let i = 0; i < (isMobile ? 10 : 15); i++) {
+            // 初始化背景微量流星
+            for (let i = 0; i < (isMobile ? 6 : 12); i++) {
                 meteors.push(createMeteor(true));
             }
 
             requestAnimationFrame(mainEngineLoop);
 
-            // 【核心修改3】等待心形画完、呼吸几秒后，在第 12.5 秒触发流星雨大结局
-            setTimeout(triggerFinale, 12500);
+            // 13.5 秒后（心形画完并停留呼吸一会儿），触发最终流星雨
+            setTimeout(triggerFinale, 13500);
         }
 
         function setupCanvas() {
@@ -260,13 +249,10 @@
             if (!div.parentNode) return;
             div.style.pointerEvents = 'none';
             div.style.opacity = '0';
-
             const rect = div.getBoundingClientRect();
             const clickX = rect.left + rect.width / 2;
             const clickY = rect.top + rect.height / 2;
-
             createHeartFireworks(clickX, clickY, color, particleCount);
-
             const currentTransform = div.style.transform;
             div.style.transform = `${currentTransform} scale(0) rotate(360deg)`;
             setTimeout(() => div.remove(), 500);
@@ -274,11 +260,10 @@
 
         function triggerFinale() {
             isFinale = true;
-
             cardElements.forEach((card) => {
                 if (!card.el.parentNode) return;
                 setTimeout(() => {
-                    explodeCard(card.el, card.palette.bg, isMobile ? 20 : 28);
+                    explodeCard(card.el, card.palette.bg, isMobile ? 18 : 28);
                 }, Math.random() * 2000);
             });
         }
@@ -297,21 +282,18 @@
             };
         }
 
-        function createHeartFireworks(sx, sy, color, count = 18) {
+        function createHeartFireworks(sx, sy, color, count) {
             for (let i = 0; i < count; i++) {
                 const angle = (2 * Math.PI * i) / count;
                 const vx = 16 * Math.pow(Math.sin(angle), 3);
                 const vy = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
                 const randSpeed = Math.random() * 0.3 + 0.8;
-
                 particles.push({
-                    x: sx,
-                    y: sy,
+                    x: sx, y: sy,
                     vx: vx * randSpeed * 0.3,
                     vy: vy * randSpeed * 0.3,
                     size: Math.random() * 2.5 + 1.5,
-                    color: color,
-                    alpha: 1.0,
+                    color: color, alpha: 1.0,
                     decay: Math.random() * 0.015 + 0.015
                 });
             }
@@ -332,8 +314,8 @@
         function mainEngineLoop(timestamp) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const maxMeteors = isFinale ? (isMobile ? 50 : 80) : (isMobile ? 10 : 15);
-            const spawnRate = isFinale ? 0.3 : 0.05;
+            const maxMeteors = isFinale ? (isMobile ? 45 : 80) : (isMobile ? 6 : 15);
+            const spawnRate = isFinale ? 0.25 : 0.03;
 
             if (meteors.length < maxMeteors && Math.random() < spawnRate) {
                 meteors.push(createMeteor());
@@ -346,7 +328,6 @@
 
                 ctx.save();
                 ctx.globalAlpha = m.opacity;
-
                 ctx.font = "bold 11px 'Microsoft YaHei'";
                 ctx.fillStyle = m.color;
                 ctx.shadowColor = m.color;
@@ -362,7 +343,6 @@
                 ctx.moveTo(m.x - 4, m.y - 4);
                 ctx.lineTo(m.x - m.length * (m.speedX / m.speedY), m.y - m.length);
                 ctx.stroke();
-
                 ctx.restore();
 
                 if (m.y > canvas.height + 40 || m.x > canvas.width + 100) {
@@ -377,29 +357,38 @@
                 p.vy += 0.03;
                 p.alpha -= p.decay;
 
-                if (p.alpha <= 0) {
-                    particles.splice(i, 1);
-                } else {
-                    drawMiniHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
-                }
+                if (p.alpha <= 0) particles.splice(i, 1);
+                else drawMiniHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
             }
 
             const phase = timestamp / 380;
-            const scale = 1.0 + 0.05 * Math.sin(phase);
+            const heartScale = 1.0 + 0.04 * Math.sin(phase);
             const now = Date.now();
 
             cardElements.forEach((card) => {
                 if (!card.el.parentNode) return;
 
                 if (now >= card.bornTime) {
-                    card.el.style.opacity = '0.95';
+                    // 【飞行与生长特效引擎】计算卡片从诞生到现在的进度，持续时间 900 毫秒
+                    let life = (now - card.bornTime) / 900; 
+                    if (life > 1) life = 1;
 
-                    const curX = card.bx * scale;
-                    const curY = card.by * scale;
+                    // 极其丝滑的贝塞尔曲线弹射感（Ease Out Quart）
+                    const ease = 1 - Math.pow(1 - life, 4);
+
+                    card.el.style.opacity = (0.95 * ease).toString();
+
+                    // 卡片坐标通过 ease 进度相乘，实现从屏幕绝对正中心平滑“飞向”最终轨迹！
+                    const curX = card.bx * heartScale * ease;
+                    const curY = card.by * heartScale * ease;
+                    const curScale = ease; // 从 0 放大到 1
 
                     const selfRotate = Math.sin(phase + card.bx * 0.1) * 3;
-                    card.el.style.transform = `translate(-50%, -50%) translate3d(${curX}px, ${curY}px, 0) scale(1) rotate(${selfRotate}deg)`;
+                    
+                    // 利用 JS 直接运算帧动画，摈弃生硬的 CSS Transition
+                    card.el.style.transform = `translate(-50%, -50%) translate3d(${curX}px, ${curY}px, 0) scale(${curScale}) rotate(${selfRotate}deg)`;
                 } else {
+                    // 未出生的卡片安静地潜伏在中心黑洞中
                     card.el.style.transform = `translate(-50%, -50%) translate3d(0, 0, 0) scale(0) rotate(0deg)`;
                 }
             });
@@ -409,7 +398,7 @@
 
         let lastWidth = window.innerWidth;
         window.addEventListener('resize', () => {
-            if (window.innerWidth !== lastWidth) {
+            if (Math.abs(window.innerWidth - lastWidth) > 50) { 
                 lastWidth = window.innerWidth;
                 setupCanvas();
                 window.location.reload();
