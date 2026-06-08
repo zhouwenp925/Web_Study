@@ -166,7 +166,9 @@
         }];
 
         const isMobile = window.innerWidth <= 768;
-        const POINTS_COUNT = isMobile ? 26 : 42;
+
+        // 【核心修改1】疏密有致：精简数量，为卡片留出舒适的呼吸缝隙
+        const POINTS_COUNT = isMobile ? 32 : 48;
 
         const cardElements = [];
         const meteors = [];
@@ -176,7 +178,8 @@
 
         function getDynamicBaseSize() {
             if (isMobile) {
-                return (window.innerWidth * 0.92) / 32;
+                // 【核心修改2】骨架外扩：让心形占比达到 88%，配合减少的卡片数，间距完美拉开
+                return (window.innerWidth * 0.88) / 32;
             } else {
                 const minScreenDim = Math.min(window.innerWidth, window.innerHeight);
                 return (minScreenDim * 0.65) / 32;
@@ -196,7 +199,7 @@
             const container = document.getElementById('heart-container');
             const baseSize = getDynamicBaseSize();
 
-            const topGap = isMobile ? 0.35 : 0.30;
+            const topGap = isMobile ? 0.32 : 0.28;
 
             for (let i = 0; i < POINTS_COUNT; i++) {
                 const t = topGap + ((2 * Math.PI - 2 * topGap) * i) / (POINTS_COUNT - 1);
@@ -209,7 +212,9 @@
                 const div = document.createElement('div');
                 div.className = 'heart-tip';
                 div.style.boxShadow = `0 6px 20px ${palette.shadow}`;
-                div.style.zIndex = Math.floor(by) + 1000;
+
+                // 【核心修改3】严格按时间轴层叠：后生成的卡片必定压在前面的卡片上！
+                div.style.zIndex = 1000 + i;
 
                 const nameLabel = document.createElement('div');
                 nameLabel.className = 'card-name';
@@ -237,7 +242,7 @@
 
                 container.appendChild(div);
 
-                const delayMs = isMobile ? 280 : 160;
+                const delayMs = isMobile ? 210 : 130;
 
                 cardElements.push({
                     el: div,
@@ -245,7 +250,7 @@
                     by: by,
                     palette: palette,
                     bornTime: Date.now() + i * delayMs,
-                    isScattering: false, // 蒲公英飞散状态标记
+                    isScattering: false,
                     lastX: 0,
                     lastY: 0,
                     lastRot: 0,
@@ -259,25 +264,22 @@
 
             requestAnimationFrame(mainEngineLoop);
 
-            // 13.5 秒后触发蒲公英飘散与流星雨大结局
-            setTimeout(triggerFinale, 13500);
+            setTimeout(triggerFinale, 13000);
         }
 
-        // 【底层优化】引入设备像素比（DPR），解决手机端文字模糊发虚的问题
         function setupCanvas() {
             canvas = document.getElementById('bg-canvas');
             ctx = canvas.getContext('2d');
-            const dpr = window.devicePixelRatio || 1; // 获取手机视网膜屏幕参数
+            const dpr = window.devicePixelRatio || 1;
 
             canvas.width = window.innerWidth * dpr;
             canvas.height = window.innerHeight * dpr;
             canvas.style.width = window.innerWidth + 'px';
             canvas.style.height = window.innerHeight + 'px';
 
-            ctx.scale(dpr, dpr); // 缩放画布，让画质达到超高清级别
+            ctx.scale(dpr, dpr);
         }
 
-        // 仅保留用户手动点击时的烟花碎裂特效
         function explodeCard(div, color, particleCount = 18) {
             if (!div.parentNode) return;
             div.style.pointerEvents = 'none';
@@ -291,27 +293,19 @@
             setTimeout(() => div.remove(), 500);
         }
 
-        // 【重构核心】大结局不再是原地爆炸，而是极其优美的蒲公英飘散
         function triggerFinale() {
             isFinale = true;
             cardElements.forEach((card) => {
                 if (!card.el.parentNode) return;
 
-                // 错落有致地触发卡片的飘散
                 setTimeout(() => {
                     card.isScattering = true;
-
-                    // 基于卡片在心形上的当前位置，计算向外飘散的爆炸角度
                     const angle = Math.atan2(card.lastY, card.lastX);
-                    // 加上一点随机角度偏差，显得更加灵动、自然
                     const finalAngle = angle + (Math.random() - 0.5) * 1.5;
-
-                    // 赋予它们向外冲刺的初始速度（铺满屏幕的动力）
-                    const speed = Math.random() * 6 + 4;
+                    const speed = Math.random() * 7 + 3;
                     card.vx = Math.cos(finalAngle) * speed;
                     card.vy = Math.sin(finalAngle) * speed;
-                    card.vr = (Math.random() - 0.5) * 8; // 随机翻转动量
-
+                    card.vr = (Math.random() - 0.5) * 8;
                 }, Math.random() * 1500);
             });
         }
@@ -323,9 +317,9 @@
                 x: Math.random() * window.innerWidth,
                 y: randomY ? Math.random() * window.innerHeight : -30,
                 length: Math.random() * 40 + 30,
-                speedX: Math.random() * 1.5 + 1.0,
+                speedX: Math.random() * 1.4 + 0.8,
                 speedY: Math.random() * 3.5 + 2.5,
-                opacity: Math.random() * 0.4 + 0.4, // 提高基础亮度
+                opacity: Math.random() * 0.4 + 0.4,
                 color: colors[Math.floor(Math.random() * colors.length)]
             };
         }
@@ -362,7 +356,6 @@
         }
 
         function mainEngineLoop(timestamp) {
-            // 注意：因为加入了 DPR 高清缩放，清空画布要基于原始像素大小
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             const maxMeteors = isFinale ? (isMobile ? 45 : 80) : (isMobile ? 6 : 15);
@@ -378,19 +371,15 @@
                 m.y += m.speedY;
 
                 ctx.save();
-
-                // 【高清文字渲染引擎优化】
-                // 1. 让文字自身变成高亮纯白，光晕变成流星颜色，极大增强对比度和清晰度
-                ctx.globalAlpha = Math.min(1.0, m.opacity + 0.3); // 确保文字足够亮
-                ctx.font = "bold 13px 'Microsoft YaHei'"; // 字体适当放大一点
-                ctx.fillStyle = "#FFFFFF"; // 纯白字芯，极其锐利
-                ctx.shadowColor = m.color; // 彩色发光
+                ctx.globalAlpha = Math.min(1.0, m.opacity + 0.3);
+                ctx.font = "bold 13px 'Microsoft YaHei'";
+                ctx.fillStyle = "#FFFFFF";
+                ctx.shadowColor = m.color;
                 ctx.shadowBlur = 6;
                 ctx.textAlign = "left";
                 ctx.textBaseline = "middle";
                 ctx.fillText(m.text, m.x, m.y);
 
-                // 2. 绘制尾巴时取消发光，防止拖慢手机性能和干扰文字视线
                 ctx.beginPath();
                 ctx.globalAlpha = m.opacity;
                 ctx.strokeStyle = m.color;
@@ -426,8 +415,7 @@
                 if (!card.el.parentNode) return;
 
                 if (card.isScattering) {
-                    // 【大结局飘散引擎】
-                    card.vx *= 0.985; // 空气阻力：赋予一种在太空中逐渐慢下来、失重的漂浮感
+                    card.vx *= 0.985;
                     card.vy *= 0.985;
                     card.vr *= 0.985;
 
@@ -435,20 +423,18 @@
                     card.lastY += card.vy;
                     card.lastRot += card.vr;
 
-                    // 当卡片飞到边缘、速度慢下来之后，开始非常温柔地淡出消失
                     if (Math.abs(card.vx) < 1.0 && Math.abs(card.vy) < 1.0) {
-                        card.alpha -= 0.005; // 耗时几秒钟缓缓消失
+                        card.alpha -= 0.005;
                     }
 
                     if (card.alpha <= 0) {
-                        card.el.remove(); // 彻底从DOM树摘除
+                        card.el.remove();
                     } else {
                         card.el.style.opacity = card.alpha.toString();
                         card.el.style.transform = `translate(-50%, -50%) translate3d(${card.lastX}px, ${card.lastY}px, 0) scale(1) rotate(${card.lastRot}deg)`;
                     }
 
                 } else if (now >= card.bornTime) {
-                    // 【常规呼吸与生长】
                     let life = (now - card.bornTime) / 900;
                     if (life > 1) life = 1;
                     const ease = 1 - Math.pow(1 - life, 4);
@@ -460,7 +446,6 @@
                     const curScale = ease;
                     const selfRotate = Math.sin(phase + card.bx * 0.1) * 3;
 
-                    // 实时记录当前坐标，为高潮飘散做准备
                     card.lastX = curX;
                     card.lastY = curY;
                     card.lastRot = selfRotate;
