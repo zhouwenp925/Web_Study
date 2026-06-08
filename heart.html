@@ -3,13 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>尹薪钰·文字流星雨与双拼卡片</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>尹薪钰·专属流星雨</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -39,14 +42,12 @@
             height: 0;
             z-index: 2;
         }
-        /* 优化后的双拼色卡片外壳 */
         
         .heart-tip {
             position: absolute;
             width: 120px;
             height: 56px;
             border-radius: 12px;
-            user-select: none;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transform: translate(-50%, -50%) scale(0);
@@ -56,23 +57,18 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* 关键：让内部的直角色块被外层的圆角切掉 */
         }
-        /* 上半部分：固定纯白背景 */
         
         .card-name {
             background-color: #FFFFFF;
             color: #555555;
-            /* 深灰色字体，在白色上显得高级不刺眼 */
             font-size: 10px;
             font-weight: bold;
             letter-spacing: 0.5px;
             text-align: left;
             padding: 4px 8px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-            /* 极弱的分隔线 */
         }
-        /* 下半部分：占据剩余空间，背景色通过JS随机注入 */
         
         .card-text {
             font-size: 13px;
@@ -90,6 +86,22 @@
             box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
             z-index: 999 !important;
         }
+        
+        @media screen and (max-width: 768px) {
+            .heart-tip {
+                width: 96px;
+                height: 46px;
+                border-radius: 9px;
+            }
+            .card-name {
+                font-size: 9px;
+                padding: 3px 6px;
+            }
+            .card-text {
+                font-size: 11px;
+                padding: 0 4px;
+            }
+        }
     </style>
 </head>
 
@@ -100,11 +112,11 @@
 
     <script>
         const TIPS = [
-            '岁岁长安', '万喜万般宜', '长乐未央', '常安长安',
-            '顺颂时宜', '百事从欢', '喜乐有分享', '共欢新故岁',
-            '岁岁常欢愉', '万事尽可期', '如星灿烂', '行至朝雾里',
-            '得偿所愿', '不染岁月风尘', '长路浩浩荡荡', '万物更新',
-            '旧疾当愈', '长安常安', '日日是好日', '山水万程皆好运'
+            '所念皆星河', '今天也很想你', '岁岁常相见', '做自己的光',
+            '偏爱与例外', '万喜万般宜', '满眼都是你', '愿你耀如繁星',
+            '所求皆如愿', '不许偷偷熬夜', '宇宙浪漫为你', '明朗且坦荡',
+            '永远偏向你', '长路浩浩荡荡', '只对你温柔', '万事尽可期',
+            '你是我的星辰', '前路浩浩荡荡', '世界第一可爱', '得偿所愿'
         ];
 
         const COLOR_PALETTES = [{
@@ -141,19 +153,20 @@
             shadow: 'rgba(205,180,219,0.4)'
         }];
 
-        const POINTS_COUNT = 46;
-        const cardElements = [];
+        const isMobile = window.innerWidth <= 768;
+        const POINTS_COUNT = isMobile ? 35 : 46;
 
+        const cardElements = [];
         const meteors = [];
         const particles = [];
         let canvas, ctx;
 
-        // 全局高能模式开关：爆炸后触发文字流星雨
         let isFinale = false;
 
         function getDynamicBaseSize() {
             const minScreenDim = Math.min(window.innerWidth, window.innerHeight);
-            return (minScreenDim * 0.60) / 32;
+            const ratio = isMobile ? 0.85 : 0.60;
+            return (minScreenDim * ratio) / 32;
         }
 
         function getHeartX(t, baseSize) {
@@ -169,26 +182,28 @@
             const container = document.getElementById('heart-container');
             const baseSize = getDynamicBaseSize();
 
+            // 【核心修改1】避开顶部重叠的“沟壑”，左右留白，首尾完美不相连
+            const topGap = 0.4; // 避开 t=0 和 t=2π 附近的盲区
+
             for (let i = 0; i < POINTS_COUNT; i++) {
-                const t = (2 * Math.PI * i) / POINTS_COUNT;
+                // 根据间隔重新计算位置弧度 t
+                const t = topGap + ((2 * Math.PI - 2 * topGap) * i) / (POINTS_COUNT - 1);
+
                 const bx = getHeartX(t, baseSize);
                 const by = getHeartY(t, baseSize);
 
                 const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
                 const text = TIPS[Math.floor(Math.random() * TIPS.length)];
 
-                // 外部容器，阴影随底色变化
                 const div = document.createElement('div');
                 div.className = 'heart-tip';
                 div.style.boxShadow = `0 6px 20px ${palette.shadow}`;
                 div.style.zIndex = Math.floor(Math.abs(bx)) + 10;
 
-                // 名字部分：纯白
                 const nameLabel = document.createElement('div');
                 nameLabel.className = 'card-name';
                 nameLabel.innerText = '尹薪钰 ✧';
 
-                // 祝福语部分：马卡龙色
                 const textLabel = document.createElement('div');
                 textLabel.className = 'card-text';
                 textLabel.innerText = text;
@@ -198,32 +213,40 @@
                 div.appendChild(nameLabel);
                 div.appendChild(textLabel);
 
-                // 手动点击依然有效
                 div.addEventListener('click', (e) => {
                     e.stopPropagation();
                     explodeCard(div, palette.bg);
                 });
 
+                div.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    explodeCard(div, palette.bg);
+                }, {
+                    passive: true
+                });
+
                 container.appendChild(div);
+
+                // 【核心修改2】极大地放慢卡片生长速度，过程长达 7 秒
+                const delayMs = isMobile ? 200 : 160;
 
                 cardElements.push({
                     el: div,
                     bx: bx,
                     by: by,
                     palette: palette,
-                    bornTime: Date.now() + i * 35
+                    bornTime: Date.now() + i * delayMs
                 });
             }
 
-            // 初始化少许背景流星
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < (isMobile ? 10 : 15); i++) {
                 meteors.push(createMeteor(true));
             }
 
             requestAnimationFrame(mainEngineLoop);
 
-            // --- 10秒后自动触发结局 ---
-            setTimeout(triggerFinale, 10000);
+            // 【核心修改3】等待心形画完、呼吸几秒后，在第 12.5 秒触发流星雨大结局
+            setTimeout(triggerFinale, 12500);
         }
 
         function setupCanvas() {
@@ -255,22 +278,21 @@
             cardElements.forEach((card) => {
                 if (!card.el.parentNode) return;
                 setTimeout(() => {
-                    explodeCard(card.el, card.palette.bg, 28);
+                    explodeCard(card.el, card.palette.bg, isMobile ? 20 : 28);
                 }, Math.random() * 2000);
             });
         }
 
-        // --- 创造文字流星 ---
         function createMeteor(randomY = false) {
             const colors = ['#FFC8DD', '#BDE0FE', '#FFFFFF', '#FFE5EC', '#E8BAFF'];
             return {
-                text: TIPS[Math.floor(Math.random() * TIPS.length)], // 随机挂载一句祝福
+                text: TIPS[Math.floor(Math.random() * TIPS.length)],
                 x: Math.random() * canvas.width,
                 y: randomY ? Math.random() * canvas.height : -30,
-                length: Math.random() * 40 + 30, // 尾巴长度
+                length: Math.random() * 40 + 30,
                 speedX: Math.random() * 1.5 + 1.0,
                 speedY: Math.random() * 3.5 + 2.5,
-                opacity: Math.random() * 0.5 + 0.3, // 让流星稍亮一点，保证文字清晰
+                opacity: Math.random() * 0.5 + 0.3,
                 color: colors[Math.floor(Math.random() * colors.length)]
             };
         }
@@ -287,7 +309,7 @@
                     y: sy,
                     vx: vx * randSpeed * 0.3,
                     vy: vy * randSpeed * 0.3,
-                    size: Math.random() * 2.5 + 2,
+                    size: Math.random() * 2.5 + 1.5,
                     color: color,
                     alpha: 1.0,
                     decay: Math.random() * 0.015 + 0.015
@@ -310,8 +332,7 @@
         function mainEngineLoop(timestamp) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 如果处于高潮阶段，满天都会是文字流星
-            const maxMeteors = isFinale ? 80 : 15;
+            const maxMeteors = isFinale ? (isMobile ? 50 : 80) : (isMobile ? 10 : 15);
             const spawnRate = isFinale ? 0.3 : 0.05;
 
             if (meteors.length < maxMeteors && Math.random() < spawnRate) {
@@ -326,21 +347,18 @@
                 ctx.save();
                 ctx.globalAlpha = m.opacity;
 
-                // 1. 绘制流星前端的祝福文字（带有微弱的霓虹发光）
-                ctx.font = "bold 12px 'Microsoft YaHei'";
+                ctx.font = "bold 11px 'Microsoft YaHei'";
                 ctx.fillStyle = m.color;
                 ctx.shadowColor = m.color;
-                ctx.shadowBlur = 6; // 文字发光效果
+                ctx.shadowBlur = 6;
                 ctx.textAlign = "left";
                 ctx.textBaseline = "middle";
                 ctx.fillText(m.text, m.x, m.y);
 
-                // 2. 绘制拖在文字后方的流星光影尾巴
                 ctx.beginPath();
                 ctx.strokeStyle = m.color;
                 ctx.lineWidth = isFinale ? 1.5 : 1.0;
-                ctx.shadowBlur = 0; // 尾巴不需要发光，否则会太卡
-                // 为了不穿透文字，光束的起点在文字的左上角偏后方
+                ctx.shadowBlur = 0;
                 ctx.moveTo(m.x - 4, m.y - 4);
                 ctx.lineTo(m.x - m.length * (m.speedX / m.speedY), m.y - m.length);
                 ctx.stroke();
@@ -352,7 +370,6 @@
                 }
             }
 
-            // 烟花粒子逻辑
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.x += p.vx;
@@ -390,9 +407,13 @@
             requestAnimationFrame(mainEngineLoop);
         }
 
+        let lastWidth = window.innerWidth;
         window.addEventListener('resize', () => {
-            setupCanvas();
-            window.location.reload();
+            if (window.innerWidth !== lastWidth) {
+                lastWidth = window.innerWidth;
+                setupCanvas();
+                window.location.reload();
+            }
         });
 
         window.onload = init;
